@@ -26,6 +26,9 @@ jobs:
       - name: Build and test with Maven
         working-directory: ./api/simpleapistudent/
         run: mvn clean verify
+
+      - name: Check code quality with Sonarcloud
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=docker-tp-sonarcloud  -Dsonar.organization=docker-tp -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simpleapistudent/pom.xml
   # define job to build and publish docker image
   build-and-push-docker-image:
     environment: github action env

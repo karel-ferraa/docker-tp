@@ -26,3 +26,37 @@ jobs:
       - name: Build and test with Maven
         working-directory: ./api/simpleapistudent/
         run: mvn clean verify
+  # define job to build and publish docker image
+  build-and-push-docker-image:
+    needs: test-backend
+    # run only when code is compiling and tests are passing
+    runs-on: ubuntu-24.04
+   
+    # steps to perform in job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+   
+      - name: Build image and push backend
+        uses: docker/build-push-action@v7
+        with:
+          # relative path to the place where source code with Dockerfile is located
+          context: ./api/simpleapistudent/
+          # Note: tags has to be all lower-case
+          tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-simple-api:latest
+   
+      - name: Build image and push database
+        uses: docker/build-push-action@v7
+        with:
+          # relative path to the place where source code with Dockerfile is located
+          context: ./database/
+          # Note: tags has to be all lower-case
+          tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-database:latest
+   
+      - name: Build image and push httpd
+        uses: docker/build-push-action@v7
+        with:
+          # relative path to the place where source code with Dockerfile is located
+          context: ./webserver/
+          # Note: tags has to be all lower-case
+          tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-webserver:latest

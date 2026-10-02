@@ -37,6 +37,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
    
       - name: Build image and push backend
         uses: docker/build-push-action@v7
@@ -45,6 +48,8 @@ jobs:
           context: ./api/simpleapistudent/
           # Note: tags has to be all lower-case
           tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-simple-api:latest
+          # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/main' }}
    
       - name: Build image and push database
         uses: docker/build-push-action@v7
@@ -53,6 +58,8 @@ jobs:
           context: ./database/
           # Note: tags has to be all lower-case
           tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-database:latest
+          # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/main' }}
    
       - name: Build image and push httpd
         uses: docker/build-push-action@v7
@@ -61,3 +68,5 @@ jobs:
           context: ./webserver/
           # Note: tags has to be all lower-case
           tags:  ${{secrets.DOCKERHUB_DISPLAYNAME}}/tp-devops-webserver:latest
+          # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/main' }}

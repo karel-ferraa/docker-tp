@@ -87,3 +87,10 @@ ENTRYPOINT ["java", "-jar", "myapp.jar"]
 * Question 1.5
 We use a reverse proxy so as to not expose the backends to the clients.
 It can also be used for load balancing, to setup encryption easily or to serve multiple applications under the same domain at different endpoints.
+* Question 1.9
+#+begin_src
+sudo docker tag karelbf/1tpdb karelbf/1tpdb:1.0 
+sudo docker push karelbf/1tpdb:1.0 
+#+end_src
+* Question 1.10
+So that we can pull them from anywhere in the world

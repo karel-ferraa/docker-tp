@@ -1,0 +1,89 @@
+build the database
+#+begin_src
+sudo docker build -t karelbf/1tpdb .
+#+end_src
+
+create a network
+#+begin_src
+docker network create 1tp-network
+#+end_src
+
+run the database
+We provide POSTGRES_PASSWORD=pwd env variable when running the database image so as to not keep the password in the text file.
+#+begin_src
+sudo docker run -d -v ./database/persist:/var/lib/postgresql/data --network 1tp-network -e POSTGRES_PASSWORD=pwd --name 1tpdb karelbf/1tpdb
+#+end_src
+
+run adminer
+#+begin_src
+sudo docker run -d --network 1tp-network -p 8080:8080 adminer
+#+end_src
+
+We can apparently download all artifacts with
+#+begin_src
+mvn dependency:go-offline
+#+end_src
+(place this before the maven build in the Dockerfile)
+This greatly speeds up image builds
+
+build the java api
+#+begin_src
+sudo docker build -t karelbf/1tpbackend . 
+#+end_src
+
+run the java api
+#+begin_src
+sudo docker run -d -p 8081:8080 --network 1tp-network --name 1tpbackend karelbf/1tpbackend 
+#+end_src
+
+retrieve the http webserver config
+#+begin_src
+/usr/local/apache2/conf/httpd.conf
+#+end_src
+
+build the webserver
+#+begin_src
+sudo docker build -t karelbf/1tpwebserver .
+#+end_src
+
+run the webserver
+#+begin_src
+sudo docker run -d --network 1tp-network --name 1tpwebserver -p 8082:80 karelbf/1tpwebserver
+#+end_src
+* Question 1.1
+
+if someone finds a vulnerability in one of our services running in docker, and gets a shell access, they will not be able to read the file with the password.
+
+* Question 1.2
+When we destroy the database container, we delete all of it's files. If we want the database to be persistent accross database instances, we have to store the database on the host's disk, and then bind mount that directory into the container.
+* Question 1.4
+We need a multistage build because we have to build the software inside the container which the compiler targets. In this case, we are using java so it's probably not necessary due to the JVM, but this is a general example.
+This part of the file downloads a jdk image to build the java app.
+#+begin_src Dockerfile
+# Build stage
+FROM eclipse-temurin:21-jdk-alpine AS myapp-build
+ENV MYAPP_HOME=/opt/myapp
+WORKDIR $MYAPP_HOME
+#+end_src
+install maven inside the build container, send our java app inside the container and build it with maven.
+#+begin_src
+RUN apk add --no-cache maven
+
+COPY pom.xml .
+COPY src ./src
+RUN mvn package -DskipTests
+#+end_src
+
+Now we can create a run container image
+#+begin_src
+# Run stage
+FROM eclipse-temurin:21-jre-alpine
+ENV MYAPP_HOME=/opt/myapp
+WORKDIR $MYAPP_HOME
+COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
+
+ENTRYPOINT ["java", "-jar", "myapp.jar"]
+#+end_src
+* Question 1.5
+We use a reverse proxy so as to not expose the backends to the clients.
+It can also be used for load balancing, to setup encryption easily or to serve multiple applications under the same domain at different endpoints.

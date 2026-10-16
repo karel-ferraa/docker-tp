@@ -104,3 +104,25 @@ sudo docker push karelbf/1tpdb:1.0
 #+end_src
 * Question 1.10
 So that we can pull them from anywhere in the world
+
+* Ansible
+
+Install an Apache2 server
+#+begin_src bash
+ansible all -m apt -a "name=apache2 state=present" --private-key=<path_to_your_ssh_key> -u admin --become
+#+end_src
+
+remember that you have to use =--become= to become superuser to do the install.
+
+instead of using the default =/etc/ansible/hosts=, we can specify a path to an inventory config. This is useful for a project specific directory. Thus, we create =./ansible/inventory= and =./ansible/inventory/setup.yml=. Ansible supports both .INI and YAML formats, which is why the =setup.yml= has different syntax to the =/etc/ansible/hosts=
+
+Remove the Apache2 server
+#+begin_src bash
+ansible all -i inventories/setup.yml -m apt -a "name=apache2 state=absent" --become
+#+end_src
+
+run the playbook
+
+#+begin_src bash
+ansible-playbook -i inventories/setup.yml playbooks/run_app.yml
+#+end_src

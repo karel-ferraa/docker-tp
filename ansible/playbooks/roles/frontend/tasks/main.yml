@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/frontend
+- name: Run frontend
+  docker_container:
+    name: docker-tp-frontend-1
+    image: karelbf/tp-devops-frontend
+    networks:
+      - name: 1tp-network
+    ports:
+      - "8083:80"

@@ -1,5 +1,3 @@
-yet another dummy change
-
 build the database
 #+begin_src
 sudo docker build -t karelbf/1tpdb .

@@ -50,6 +50,16 @@ run the webserver
 #+begin_src
 sudo docker run -d --network 1tp-network --name 1tpwebserver -p 8082:80 karelbf/1tpwebserver
 #+end_src
+
+build the frontend
+#+begin_src
+sudo docker build -t karelbf/1tpfrontend . 
+#+end_src
+
+run the frontend
+#+begin_src
+sudo docker run -p 8081:80 --name 1tpfrontend karelbf/1tpfrontend
+#+end_src
 * Question 1.1
 
 if someone finds a vulnerability in one of our services running in docker, and gets a shell access, they will not be able to read the file with the password.
